@@ -7,6 +7,7 @@ import { UserPlus, Mail, Lock, CheckCircle2 } from 'lucide-react';
 const Register = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
     const [adminSecret, setAdminSecret] = useState('');
     const { register } = useAuth();
