@@ -28,24 +28,25 @@ const Login = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="glass-card"
-                style={{ maxWidth: '450px', margin: '0 auto', borderTop: '4px solid var(--primary)' }}
+                style={{ maxWidth: '450px', margin: '0 auto' }}
             >
                 <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
                     <div style={{
-                        width: '64px',
-                        height: '64px',
-                        background: 'rgba(26, 54, 93, 0.1)',
-                        borderRadius: '100px',
+                        width: '72px',
+                        height: '72px',
+                        background: 'linear-gradient(135deg, hsla(var(--primary-h), var(--primary-s), 55%, 0.1), hsla(var(--secondary-h), var(--secondary-s), 60%, 0.1))',
+                        borderRadius: '24px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         margin: '0 auto 1.5rem',
-                        color: 'var(--primary)'
+                        color: 'var(--primary)',
+                        border: '1px solid var(--glass-border)'
                     }}>
                         <LogIn size={32} />
                     </div>
-                    <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Student Login</h2>
-                    <p style={{ color: 'var(--text-muted)' }}>Welcome back to SREC EduSentiment</p>
+                    <h2 className="gradient-text" style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Hub Login</h2>
+                    <p style={{ color: 'var(--text-muted)', fontWeight: '500' }}>Access the SREC Intelligence Network</p>
                 </div>
 
                 {error && (

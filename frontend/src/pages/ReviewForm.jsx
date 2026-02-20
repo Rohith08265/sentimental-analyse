@@ -65,12 +65,12 @@ const ReviewForm = () => {
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                 >
-                    <h1 style={{ fontSize: '3rem', marginBottom: '1.5rem', color: 'var(--primary)' }}>
-                        Share Your <span style={{ color: 'var(--secondary)' }}>Experience</span>
+                    <h1 className="gradient-text" style={{ fontSize: '4rem', marginBottom: '2rem', lineHeight: '1.1' }}>
+                        Share Your <br /> Experience
                     </h1>
-                    <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginBottom: '2rem' }}>
-                        Your feedback helps the college administration organize better events for the student community.
-                        Every review is analyzed using AI to understand the sentiment and improve future initiatives.
+                    <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginBottom: '3rem', fontWeight: '500', lineHeight: '1.8' }}>
+                        Your feedback is the catalyst for a better campus. We use enterprise-grade AI
+                        to ensure every student's voice directly shapes the future of events at SREC.
                     </p>
 
                     <div className="glass-panel" style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>

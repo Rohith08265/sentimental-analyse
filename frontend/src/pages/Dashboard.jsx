@@ -138,23 +138,30 @@ const Dashboard = () => {
     );
 
     if (loading) return (
-        <div className="container" style={{ padding: '10rem 0', textAlign: 'center' }}>
-            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}>
-                <TrendingUp size={48} color="var(--primary)" />
+        <div className="container" style={{ padding: '10rem 0', textAlign: 'center', position: 'relative' }}>
+            <motion.div
+                animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                style={{ marginBottom: '2rem' }}
+            >
+                <TrendingUp size={64} color="var(--primary)" style={{ opacity: 0.8 }} />
             </motion.div>
-            <p style={{ marginTop: '1rem', fontWeight: '600' }}>Loading Analytics Engine...</p>
+            <h2 className="gradient-text" style={{ fontSize: '1.5rem', fontWeight: '800' }}>Calibrating Intelligence Engine...</h2>
+            <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>Synchronizing college sentiment data</p>
         </div>
     );
 
     if (!analytics) return (
-        <div className="container" style={{ padding: '4rem 0', textAlign: 'center' }}>
-            <div className="glass-card" style={{ maxWidth: '500px', margin: '0 auto' }}>
-                <h2 style={{ color: '#e74c3c' }}>Access Restricted</h2>
-                <p style={{ marginTop: '1rem', color: 'var(--text-muted)' }}>
-                    We couldn't load the analytics data. This usually happens if your session has expired or you don't have admin privileges.
+        <div className="container" style={{ padding: '6rem 0', textAlign: 'center' }}>
+            <div className="glass-card" style={{ maxWidth: '500px', margin: '0 auto', borderTop: '4px solid #ef4444' }}>
+                <AlertCircle size={48} color="#ef4444" style={{ marginBottom: '1.5rem' }} />
+                <h2 style={{ color: '#ef4444', marginBottom: '1rem' }}>Restricted Access</h2>
+                <p style={{ color: 'var(--text-muted)' }}>
+                    Your current credentials do not permit viewing the analytics engine.
+                    Please sign in as an administrator to access these insights.
                 </p>
-                <button className="btn btn-primary" style={{ marginTop: '2rem' }} onClick={() => window.location.reload()}>
-                    Retry Connection
+                <button className="btn btn-primary" style={{ marginTop: '2.5rem' }} onClick={() => window.location.reload()}>
+                    Verify Identity
                 </button>
             </div>
         </div>
@@ -162,15 +169,15 @@ const Dashboard = () => {
 
     return (
         <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             className="container"
-            style={{ padding: '2rem 0 6rem' }}
+            style={{ padding: '4rem 0 8rem' }}
         >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem' }}>
                 <div>
-                    <h1 style={{ color: 'var(--primary)', fontSize: '2.5rem' }}>Intelligence Dashboard</h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Real-time student sentiment & event feedback analysis</p>
+                    <h1 className="gradient-text" style={{ fontSize: '3.5rem', lineHeight: '1', marginBottom: '0.8rem' }}>Intelligence Hub</h1>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: '500' }}>Deep-dive analysis of student sentiment and campus feedback.</p>
 
                     <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', background: 'var(--glass-bg)', padding: '4px', borderRadius: '12px', width: 'fit-content', border: '1px solid var(--glass-border)' }}>
                         <button

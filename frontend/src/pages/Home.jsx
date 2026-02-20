@@ -6,28 +6,39 @@ import { MessageSquare, BarChart3, ShieldCheck, Sparkles } from 'lucide-react';
 
 const FeatureCard = ({ icon: Icon, title, description, delay }) => (
     <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
+        whileHover={{
+            y: -15,
+            scale: 1.02,
+            boxShadow: "0 30px 60px -12px rgba(15, 23, 42, 0.15)"
+        }}
         viewport={{ once: true }}
-        transition={{ delay }}
+        transition={{ type: "spring", stiffness: 300 }}
         className="glass-card"
-        style={{ flex: 1, textAlign: 'center' }}
+        style={{ flex: 1, textAlign: 'center', cursor: 'default' }}
     >
-        <div style={{
-            width: '60px',
-            height: '60px',
-            background: 'rgba(26, 54, 93, 0.1)',
-            borderRadius: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1.5rem',
-            color: 'var(--primary)'
-        }}>
-            <Icon size={32} />
-        </div>
-        <h3 style={{ marginBottom: '1rem' }}>{title}</h3>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>{description}</p>
+        <motion.div
+            initial={{ scale: 0 }}
+            whileInView={{ scale: 1 }}
+            transition={{ delay: delay + 0.2, type: "spring" }}
+            style={{
+                width: '80px',
+                height: '80px',
+                background: 'linear-gradient(135deg, hsla(var(--primary-h), var(--primary-s), 55%, 0.1), hsla(var(--secondary-h), var(--secondary-s), 60%, 0.1))',
+                borderRadius: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 2rem',
+                color: 'var(--primary)',
+                border: '1px solid var(--glass-border)'
+            }}
+        >
+            <Icon size={40} />
+        </motion.div>
+        <h3 style={{ fontSize: '1.5rem', marginBottom: '1.2rem', fontWeight: '800' }}>{title}</h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: '1.7' }}>{description}</p>
     </motion.div>
 );
 
@@ -37,67 +48,71 @@ const Home = () => {
 
     return (
         <div className="home-page">
-            <div className="bg-blob blob-1"></div>
-            <div className="bg-blob blob-2"></div>
-
-            <section className="hero" style={{ padding: '6rem 0' }}>
+            <section className="hero" style={{ padding: '8rem 0 6rem', position: 'relative', overflow: 'hidden' }}>
                 <div className="container">
-                    <div style={{ textAlign: 'center', maxWidth: '900px', margin: '0 auto' }}>
+                    <div style={{ textAlign: 'center', maxWidth: '1000px', margin: '0 auto' }}>
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.5 }}
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
                             style={{
                                 display: 'inline-flex',
                                 alignItems: 'center',
-                                gap: '8px',
-                                background: 'rgba(212, 175, 55, 0.1)',
-                                color: '#856404',
-                                padding: '8px 16px',
+                                gap: '10px',
+                                background: 'white',
+                                padding: '10px 24px',
                                 borderRadius: '100px',
-                                marginBottom: '2rem',
-                                fontSize: '0.9rem',
-                                fontWeight: '600'
+                                marginBottom: '3rem',
+                                fontSize: '0.95rem',
+                                fontWeight: '700',
+                                boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+                                border: '1px solid var(--glass-border)'
                             }}
                         >
-                            <Sparkles size={16} />
-                            SREC Nandyal Official Review Platform
+                            <span style={{ color: 'var(--primary)' }}><Sparkles size={18} /></span>
+                            <span className="gradient-text">Next-Gen Sentiment Analysis</span>
                         </motion.div>
 
                         <motion.h1
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            style={{ fontSize: '4.5rem', lineHeight: '1.1', marginBottom: '1.5rem' }}
+                            transition={{ delay: 0.1, duration: 0.8 }}
+                            style={{ fontSize: '5.5rem', lineHeight: '1', marginBottom: '2rem', letterSpacing: '-0.04em' }}
                         >
-                            Understand Every <span style={{ color: 'var(--primary-light)' }}>Voice</span>. <br />
-                            Improve Every <span style={{ color: 'var(--secondary)' }}>Event</span>.
+                            Decipher the <span className="gradient-text">Pulse</span> <br />
+                            of Your Campus.
                         </motion.h1>
 
                         <motion.p
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                            style={{ fontSize: '1.25rem', color: 'var(--text-muted)', marginBottom: '3rem', maxWidth: '700px', margin: '0 auto 3rem' }}
+                            transition={{ delay: 0.2, duration: 0.8 }}
+                            style={{
+                                fontSize: '1.4rem',
+                                color: 'var(--text-muted)',
+                                marginBottom: '4rem',
+                                maxWidth: '750px',
+                                margin: '0 auto 4rem',
+                                fontWeight: '500'
+                            }}
                         >
-                            Advanced AI-powered sentiment analysis for college events.
-                            Transforming student feedback into actionable campus insights.
+                            Empower SREC Nandyal with AI-driven insights. We transform student voices
+                            into visual stories, helping every event reach its full potential.
                         </motion.p>
 
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4 }}
-                            style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}
+                            transition={{ delay: 0.3, duration: 0.8 }}
+                            style={{ display: 'flex', gap: '2rem', justifyContent: 'center' }}
                         >
                             {(!user || user.role === 'student') && (
                                 <button className="btn btn-primary" onClick={() => navigate('/submit')}>
-                                    <MessageSquare size={20} /> Submit Review
+                                    <MessageSquare size={22} /> Get Started
                                 </button>
                             )}
                             {(!user || user.role === 'admin') && (
-                                <button className="btn btn-outline" onClick={() => navigate('/dashboard')}>
-                                    <BarChart3 size={20} /> View Analytics
+                                <button className="btn" style={{ background: 'white', color: 'var(--text-main)', border: '1px solid var(--glass-border)' }} onClick={() => navigate('/dashboard')}>
+                                    <BarChart3 size={22} /> Admin Studio
                                 </button>
                             )}
                         </motion.div>
@@ -105,33 +120,34 @@ const Home = () => {
                 </div>
             </section>
 
-            <section style={{ padding: '4rem 0 8rem' }}>
+            <section style={{ padding: '6rem 0 10rem' }}>
                 <div className="container">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, margin: "-100px" }}
-                        variants={{
-                            visible: { transition: { staggerChildren: 0.1 } }
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                            gap: '3rem'
                         }}
-                        style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}
                     >
                         <FeatureCard
                             icon={MessageSquare}
-                            title="Easy Feedback"
-                            description="Seamlessly share your thoughts on workshops, fests, and technical seminars."
+                            title="Instant Feedback"
+                            description="A frictionless experience for students to share deep insights on any college event within seconds."
                             delay={0.1}
                         />
                         <FeatureCard
                             icon={BarChart3}
-                            title="Real-time Insights"
-                            description="Visualize sentiment trends across multiple events with high-precision AI analysis."
+                            title="Dynamic Analytics"
+                            description="Real-time data processing that identifies trends, emotions, and areas for campus growth."
                             delay={0.2}
                         />
                         <FeatureCard
                             icon={ShieldCheck}
-                            title="Secure Platform"
-                            description="Restricted access for authenticated @srecnandyal.edu.in students."
+                            title="Elite Security"
+                            description="Enterprise-grade authentication ensures your data is handled with the highest level of privacy."
                             delay={0.3}
                         />
                     </motion.div>
