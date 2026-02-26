@@ -20,9 +20,16 @@ exports.register = async (req, res) => {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Determine role
+        let role = 'student';
+        if (req.body.adminSecret === process.env.ADMIN_SECRET_KEY && process.env.ADMIN_SECRET_KEY) {
+            role = 'admin';
+            console.log(`Granting ADMIN role to: ${normalizedEmail}`);
+        }
+
         const { data: newUser, error } = await supabase
             .from('users')
-            .insert({ email: normalizedEmail, password: hashedPassword, role: 'student' })
+            .insert({ email: normalizedEmail, password: hashedPassword, role: role })
             .select()
             .single();
 
@@ -31,7 +38,7 @@ exports.register = async (req, res) => {
             return res.status(400).json({ error: error.message });
         }
 
-        res.status(201).json({ message: 'User registered' });
+        res.status(201).json({ message: role === 'admin' ? 'Admin registered successfully' : 'User registered' });
     } catch (error) {
         console.error('Registration Error:', error);
         res.status(400).json({ error: error.message });
