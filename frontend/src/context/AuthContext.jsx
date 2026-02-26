@@ -25,8 +25,8 @@ export const AuthProvider = ({ children }) => {
         axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
     };
 
-    const register = async (email, password, role) => {
-        await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, { email, password, role });
+    const register = async (email, password) => {
+        await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, { email, password });
     };
 
     const logout = () => {

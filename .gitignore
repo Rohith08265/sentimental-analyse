@@ -18,3 +18,16 @@ npm-debug.log*
 # OS files
 .DS_Store
 Thumbs.db
+
+# SQLite local database
+*.db
+
+# Test & temp files
+backend/test_*.js
+backend/create_admin.js
+backend/*_tunnel*.txt
+backend/*_serveo*.txt
+serveo_out.txt
+
+# Agent config
+.agent/

@@ -45,9 +45,7 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchData();
-        if (viewMode === 'all' || viewMode === 'latest') {
-            fetchBatches();
-        }
+        fetchBatches();
     }, [viewMode]);
 
     const fetchBatches = async () => {
@@ -232,7 +230,7 @@ const Dashboard = () => {
                                 <option value="latest">Latest Upload</option>
                                 {batches.map(batch => (
                                     <option key={batch._id} value={batch._id}>
-                                        Upload: {new Date(batch.timestamp).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} ({batch.count} reviews)
+                                        Upload: {new Date(batch.timestamp).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} ({batch.total} reviews)
                                     </option>
                                 ))}
                             </select>
