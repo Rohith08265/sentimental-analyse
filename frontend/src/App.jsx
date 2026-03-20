@@ -89,10 +89,9 @@ function AppContent() {
               <li style={{ height: '24px', width: '1px', background: 'var(--glass-border)' }}></li>
 
               {!user ? (
-                <>
-                  <li><Link to="/login">Sign In</Link></li>
-                  <li><Link to="/register" className="btn btn-primary" style={{ padding: '8px 20px', fontSize: '0.9rem' }}>Join SREC</Link></li>
-                </>
+                <li>
+                  <Link to="/login" className="btn btn-primary" style={{ padding: '8px 20px', fontSize: '0.9rem' }}>Sign In</Link>
+                </li>
               ) : (
                 <>
                   <li style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--primary-light)', fontWeight: '700' }}>

@@ -347,3 +347,21 @@ nav {
   border-radius: 5px;
   border: 3px solid var(--bg-main);
 }
+
+/* Spinner Animation for Loading States */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin-animation {
+  animation: spin 1s linear infinite;
+}
+
+/* Dark mode adjustments for Google button */
+[data-theme='dark'] .google-btn,
+[data-theme='dark'] button[style*="background: white"] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-main) !important;
+  border-color: var(--glass-border) !important;
+}

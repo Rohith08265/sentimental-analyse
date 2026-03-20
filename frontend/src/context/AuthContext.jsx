@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { supabase } from '../supabaseClient';
 import axios from 'axios';
 
 const AuthContext = createContext();
@@ -7,38 +8,110 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        const token = localStorage.getItem('token');
-        if (storedUser && token) {
-            setUser(JSON.parse(storedUser));
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    // Fetch user role from our backend
+    const fetchUserRole = async (supabaseUser, accessToken) => {
+        try {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/auth/profile`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            return {
+                id: supabaseUser.id,
+                email: supabaseUser.email,
+                role: res.data.role || 'student'
+            };
+        } catch (err) {
+            // If profile endpoint fails, default to student
+            return {
+                id: supabaseUser.id,
+                email: supabaseUser.email,
+                role: 'student'
+            };
         }
-        setLoading(false);
+    };
+
+    useEffect(() => {
+        // Check active session on mount
+        const initAuth = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${session.access_token}`;
+                    const userWithRole = await fetchUserRole(session.user, session.access_token);
+                    setUser(userWithRole);
+                }
+            } catch (err) {
+                console.error('Auth init error:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        initAuth();
+
+        // Listen for auth state changes (login, logout, token refresh)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${session.access_token}`;
+                const userWithRole = await fetchUserRole(session.user, session.access_token);
+                setUser(userWithRole);
+                setLoading(false);
+            } else if (event === 'SIGNED_OUT') {
+                setUser(null);
+                delete axios.defaults.headers.common['Authorization'];
+                setLoading(false);
+            } else if (event === 'TOKEN_REFRESHED' && session) {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${session.access_token}`;
+            }
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
-    const login = async (email, password) => {
-        const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, { email, password });
-        localStorage.setItem('token', res.data.token);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-        setUser(res.data.user);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+    // Send OTP to email
+    const sendOtp = async (email) => {
+        const { error } = await supabase.auth.signInWithOtp({ email });
+        if (error) throw error;
     };
 
-    const register = async (email, password) => {
-        await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, { email, password });
+    // Verify OTP entered by the user
+    const verifyOtp = async (email, token) => {
+        const { data, error } = await supabase.auth.verifyOtp({
+            email,
+            token,
+            type: 'email'
+        });
+        if (error) throw error;
+        return data;
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+    // Sign in with Google OAuth
+    const signInWithGoogle = async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+        if (error) throw error;
+    };
+
+    // Logout
+    const logout = async () => {
+        await supabase.auth.signOut();
         setUser(null);
         delete axios.defaults.headers.common['Authorization'];
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, loading }}>
-            {!loading && children}
+        <AuthContext.Provider value={{
+            user,
+            loading,
+            sendOtp,
+            verifyOtp,
+            signInWithGoogle,
+            logout
+        }}>
+            {children}
         </AuthContext.Provider>
     );
 };

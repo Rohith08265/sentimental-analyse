@@ -25,6 +25,7 @@ Thumbs.db
 # Test & temp files
 backend/test_*.js
 backend/create_admin.js
+backend/create_remote_admin.js
 backend/*_tunnel*.txt
 backend/*_serveo*.txt
 serveo_out.txt
