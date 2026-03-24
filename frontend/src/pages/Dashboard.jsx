@@ -84,23 +84,54 @@ const Dashboard = () => {
             skipEmptyLines: true,
             complete: async (results) => {
                 try {
-                    // Map CSV fields to API expected fields (supporting specific headers from user image)
-                    const reviewsToSubmit = results.data.map(row => {
-                        const eventName = row['Event_Name'] || row['Event Name'] || row['Event'] || 'CSV Upload';
+                    if (!results.data || results.data.length === 0) {
+                        throw new Error("CSV file is empty.");
+                    }
+
+                    // Auto-detect the text/review column
+                    const headers = Object.keys(results.data[0]);
+                    const textTerms = ['review', 'feedback', 'comment', 'text', 'description', 'message', 'tweet', 'response', 'body', 'content', 'opinion'];
+                    let textColumn = null;
+                    
+                    for (const header of headers) {
+                        const lowerHeader = header.toLowerCase();
+                        if (textTerms.some(term => lowerHeader.includes(term))) {
+                            textColumn = header;
+                            break;
+                        }
+                    }
+
+                    // Fallback: If no common name is found, find the column with the longest average string length > 20
+                    if (!textColumn) {
+                        for (const header of headers) {
+                             const avgLength = results.data.reduce((sum, row) => sum + (row[header] ? String(row[header]).length : 0), 0) / results.data.length;
+                             if (avgLength > 20) {
+                                 textColumn = header;
+                                 break;
+                             }
+                        }
+                    }
+
+                    // Map CSV fields to API expected fields
+                    const reviewsToSubmit = results.data.map((row, index) => {
+                        const eventName = row['Event_Name'] || row['Event Name'] || row['Event'] || row['Topic'] || 'CSV Upload';
                         // Try to infer event type from name if not provided
                         let eventType = row['Category'] || row['Type'] || (eventName.toLowerCase().includes('fest') ? 'Fest' : 'Other');
+                        
+                        // Use auto-detected text column if available, else try fallbacks
+                        const description = textColumn ? row[textColumn] : (row['Review_Description'] || row['Review'] || row['Feedback'] || row['Comment'] || '');
 
                         return {
-                            studentName: row['Student_Name'] || row['Student Name'] || row['Name'] || 'Anonymous',
+                            studentName: row['Student_Name'] || row['Student Name'] || row['Name'] || row['User'] || `User ${index+1}`,
                             eventName: eventName,
                             eventType: eventType,
                             rating: parseInt(row['Rating_Out_of_5'] || row['Rating'] || row['Score'] || 3),
-                            description: row['Review_Description'] || row['Review'] || row['Feedback'] || row['Comment'] || ''
+                            description: description
                         };
-                    }).filter(r => r.description);
+                    }).filter(r => r.description && String(r.description).trim() !== '');
 
                     if (reviewsToSubmit.length === 0) {
-                        throw new Error('No valid reviews found in CSV. Ensure you have a "Review" or "Feedback" column.');
+                        throw new Error('No valid text found in CSV. We couldn\'t auto-detect a review/feedback column.');
                     }
 
                     await axios.post(`${import.meta.env.VITE_API_URL}/reviews/bulk-submit`, { reviews: reviewsToSubmit });

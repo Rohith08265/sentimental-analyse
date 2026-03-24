@@ -1,15 +1,58 @@
 const supabase = require('../supabaseClient');
 const Sentiment = require('sentiment');
 const sentiment = new Sentiment();
+const axios = require('axios');
 
 exports.submitReview = async (req, res) => {
     try {
         const { studentName, eventName, eventType, rating, description } = req.body;
 
-        const result = sentiment.analyze(description);
         let sentimentLabel = 'Neutral';
-        if (result.score > 0) sentimentLabel = 'Positive';
-        else if (result.score < 0) sentimentLabel = 'Negative';
+        let sentimentScore = 0;
+
+        if (process.env.GROK_API_KEY) {
+            try {
+                const response = await axios.post('https://api.x.ai/v1/chat/completions', {
+                    model: 'grok-beta',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'Analyze the sentiment of the following review. Return ONLY a valid JSON object with two keys: "sentiment" (strictly "Positive", "Negative", or "Neutral") and "score" (a number between -5 and 5). Do NOT wrap in markdown block quotes.'
+                        },
+                        {
+                            role: 'user',
+                            content: description || ''
+                        }
+                    ],
+                    temperature: 0.1
+                }, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${process.env.GROK_API_KEY}`
+                    }
+                });
+
+                let content = response.data.choices[0].message.content.trim();
+                if (content.startsWith('```json')) content = content.substring(7);
+                else if (content.startsWith('```')) content = content.substring(3);
+                if (content.endsWith('```')) content = content.substring(0, content.length - 3);
+
+                const parsed = JSON.parse(content.trim());
+                sentimentLabel = parsed.sentiment;
+                sentimentScore = parsed.score;
+            } catch (err) {
+                console.error('Grok Single API Error:', err?.response?.data || err.message);
+                const result = sentiment.analyze(description || '');
+                if (result.score > 0) sentimentLabel = 'Positive';
+                else if (result.score < 0) sentimentLabel = 'Negative';
+                sentimentScore = result.score;
+            }
+        } else {
+            const result = sentiment.analyze(description || '');
+            if (result.score > 0) sentimentLabel = 'Positive';
+            else if (result.score < 0) sentimentLabel = 'Negative';
+            sentimentScore = result.score;
+        }
 
         const { data: newReview, error } = await supabase
             .from('reviews')
@@ -20,7 +63,7 @@ exports.submitReview = async (req, res) => {
                 rating,
                 description,
                 sentiment: sentimentLabel,
-                score: result.score,
+                score: sentimentScore,
                 batch_id: 'manual'
             })
             .select()
@@ -28,7 +71,6 @@ exports.submitReview = async (req, res) => {
 
         if (error) throw error;
 
-        // Map back to camelCase for frontend compatibility
         const review = {
             _id: newReview.id,
             studentName: newReview.student_name,
@@ -44,6 +86,7 @@ exports.submitReview = async (req, res) => {
 
         res.status(201).json({ message: 'Review submitted successfully', review });
     } catch (error) {
+        console.error('Submit Error:', error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -181,12 +224,69 @@ exports.bulkSubmitReviews = async (req, res) => {
         }
 
         const batchId = `batch_${Date.now()}`;
+        const reviewsTextArray = reviews.map(r => r.description || '');
+        let grokResults = null;
 
-        const processedReviews = reviews.map(r => {
-            const result = sentiment.analyze(r.description || '');
+        if (process.env.GROK_API_KEY) {
+            grokResults = [];
+            const chunkSize = 50;
+            for (let i = 0; i < reviewsTextArray.length; i += chunkSize) {
+                const chunk = reviewsTextArray.slice(i, i + chunkSize);
+                try {
+                    const response = await axios.post('https://api.x.ai/v1/chat/completions', {
+                        model: 'grok-beta',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: 'You are an expert sentiment analyzer. I will give you a JSON array of review descriptions. Return ONLY a valid JSON array of the exact same length in the exact same order. Each element must be an object with two keys: "sentiment" (strictly "Positive", "Negative", or "Neutral") and "score" (a number between -5 and 5). Do NOT wrap in markdown block quotes.'
+                            },
+                            {
+                                role: 'user',
+                                content: JSON.stringify(chunk)
+                            }
+                        ],
+                        temperature: 0.1
+                    }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${process.env.GROK_API_KEY}`
+                        }
+                    });
+
+                    let content = response.data.choices[0].message.content.trim();
+                    if (content.startsWith('```json')) content = content.substring(7);
+                    else if (content.startsWith('```')) content = content.substring(3);
+                    if (content.endsWith('```')) content = content.substring(0, content.length - 3);
+                    
+                    const parsed = JSON.parse(content.trim());
+                    if (Array.isArray(parsed) && parsed.length === chunk.length) {
+                        grokResults.push(...parsed);
+                    } else {
+                        console.warn('Grok API mismatch in response length');
+                        grokResults = null;
+                        break;
+                    }
+                } catch (err) {
+                    console.error('Grok API Error:', err?.response?.data || err.message);
+                    grokResults = null;
+                    break;
+                }
+            }
+        }
+
+        const processedReviews = reviews.map((r, index) => {
             let sentimentLabel = 'Neutral';
-            if (result.score > 0) sentimentLabel = 'Positive';
-            else if (result.score < 0) sentimentLabel = 'Negative';
+            let score = 0;
+
+            if (grokResults && grokResults[index]) {
+                sentimentLabel = grokResults[index].sentiment;
+                score = grokResults[index].score;
+            } else {
+                const result = sentiment.analyze(r.description || '');
+                if (result.score > 0) sentimentLabel = 'Positive';
+                else if (result.score < 0) sentimentLabel = 'Negative';
+                score = result.score;
+            }
 
             return {
                 student_name: r.studentName || 'Anonymous',
@@ -195,7 +295,7 @@ exports.bulkSubmitReviews = async (req, res) => {
                 rating: r.rating || 3,
                 description: r.description,
                 sentiment: sentimentLabel,
-                score: result.score,
+                score: score,
                 batch_id: batchId
             };
         });
@@ -208,6 +308,7 @@ exports.bulkSubmitReviews = async (req, res) => {
         if (error) throw error;
         res.status(201).json({ message: `${savedReviews.length} reviews processed and saved`, count: savedReviews.length });
     } catch (error) {
+        console.error('Bulk Submit Error:', error);
         res.status(500).json({ error: error.message });
     }
 };
