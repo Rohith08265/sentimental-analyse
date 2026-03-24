@@ -439,15 +439,12 @@ const Dashboard = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            <AnimatePresence>
-                                {filteredReviews.map((r, idx) => (
-                                    <motion.tr
+                            {filteredReviews.length > 0 ? (
+                                filteredReviews.map((r) => (
+                                    <tr
                                         key={r._id}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0, x: -20 }}
-                                        transition={{ delay: idx * 0.05 }}
-                                        style={{ borderBottom: '1px solid var(--glass-border)' }}
+                                        style={{ borderBottom: '1px solid var(--glass-border)', transition: 'background 0.2s' }}
+                                        className="table-row-hover"
                                     >
                                         <td style={{ padding: '1.2rem' }}>
                                             <div style={{ fontWeight: '700' }}>{r.studentName}</div>
@@ -480,14 +477,20 @@ const Dashboard = () => {
                                             <button
                                                 onClick={() => handleDelete(r._id)}
                                                 className="btn"
-                                                style={{ padding: '8px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none' }}
+                                                style={{ padding: '8px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', cursor: 'pointer' }}
                                             >
                                                 <Trash2 size={18} />
                                             </button>
                                         </td>
-                                    </motion.tr>
-                                ))}
-                            </AnimatePresence>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                                        No matching activity found.
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
